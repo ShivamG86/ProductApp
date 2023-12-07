@@ -15,7 +15,7 @@ app.use(function (req, res, next) {
     );
     next();
 });
-var port = process.env.PORT||2410;
+const port = 2410;
 app.listen(port, () => console.log(`Listening on port ${port}!`));
 
 let {productsData} = require("./productData.js");
@@ -114,5 +114,50 @@ app.get("/productApp/users", function(req, res) {
     res.send(simplifiedUserData);
 });
 
+app.get("/productApp/users/:username", function(req, res) {
+    let username = req.params.username;
+    let usernames = userData.find((st) => st.username === username);
+    if(usernames) res.send(usernames);
+    else res.status(404).send("No User found");
+})
+
+app.post("/productApp/users", function (req, res) {
+    let body = req.body;
+    let newUsername = body.username;
+    let existingUser = userData.find((user) => user.username === newUsername);
+
+    if (existingUser) {
+        return res.status(400).send("Username already exists");
+    }
+    userData.push(body);
+    res.send(body);
+});
+
+app.put("/productApp/users/:username", function(req, res) {
+    let username = req.params.username;
+    let body = req.body;
+    let index = userData.findIndex((st) => st.username === username);
+    console.log(index);
+    if (index >= 0) {
+        let updatedUser = { username: username, ...body }; 
+        userData[index] = updatedUser;
+        res.send(updatedUser);
+    } else {
+        res.status(404).send("No User Found");
+    }
+});
+
+
+app.delete("/productApp/users/:username", function(req, res) {
+    let username = req.params.username;
+    let index = userData.findIndex((st) => st.username === username);
+    console.log(index)
+    if (index >= 0) {
+        let deletedUser = userData.splice(index, 1);
+        res.send(deletedUser);
+    } else {
+        res.status(404).send("No User Found");
+    }
+});
 
 
